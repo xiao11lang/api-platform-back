@@ -27,7 +27,7 @@ async function login(ctx) {
       detail: "用户名不存在"
     };
   } else {
-    const { password, id, sex } = res[0].dataValues;
+    const { password, id, sex,avatar } = res[0].dataValues;
     if (password != pass) {
       ctx.status = 500;
       ctx.body = {
@@ -40,7 +40,8 @@ async function login(ctx) {
         info: {
           name: name,
           id: id,
-          sex: sex
+          sex: sex,
+          avatar:avatar
         }
       };
     }
@@ -76,6 +77,21 @@ async function changePass(ctx) {
     };
   }
 }
+async function uploadAvatar(ctx){
+    const {id}=ctx.request.body
+    let file=ctx.request.files.file
+    let name=''
+    if(file){
+        name=`upload${file.path.split('upload')[1]}`
+    }
+    
+    await update(id,{avatar:name})
+    ctx.body={
+        status:1,
+        detail:'上传成功',
+        url:`http://localhost:80/img/${name}`,
+    }
+}
 module.exports = [
   {
     handler: register,
@@ -95,6 +111,11 @@ module.exports = [
   {
     handler: changePass,
     path: "/changePass",
+    method: "post"
+  },
+  {
+    handler: uploadAvatar,
+    path: "/uploadAvatar",
     method: "post"
   }
 ];
