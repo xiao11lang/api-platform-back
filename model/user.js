@@ -6,7 +6,14 @@ const User=sequelize.define('user',{
     },
     password:{
         type:STRING(30)
-    }
+    },
+    sex:{
+        type:STRING(10),
+        defaultValue:'male'
+    },
+    avatar:{
+        type:STRING(100)
+    },
 })
 function findByName(name){
     return User.findAll({
@@ -15,18 +22,25 @@ function findByName(name){
         }
     })
 }
+function findById(id){
+    return User.findAll({
+        where:{
+            id:id
+        }
+    })
+}
 function insert(data){
     return User.sync().then(()=>{
         return User.create(data)
     })
 }
-function update(id){
-    return User.update({
+function update(id,values){
+    return User.update(values,{
         where:{
             id:id
         }
     })
 }
 module.exports={
-    insert,update,findByName
+    insert,update,findByName,findById
 }
