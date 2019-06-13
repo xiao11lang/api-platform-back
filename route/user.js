@@ -1,4 +1,5 @@
 const { insert, update, findByName, findById } = require("../model/user");
+const { findByUesrId } = require("../model/message");
 async function register(ctx) {
   const { name, pass } = ctx.request.body;
   let res = await findByName(name);
@@ -27,13 +28,15 @@ async function login(ctx) {
       detail: "用户名不存在"
     };
   } else {
-    const { password, id, sex,avatar } = res[0].dataValues;
+    const { password, id, sex, avatar } = res[0].dataValues;
     if (password != pass) {
       ctx.status = 500;
       ctx.body = {
         detail: "密码错误"
       };
     } else {
+      let mes = await findByUesrId(id);
+      mes = mes.map(value => value.dataValues);
       ctx.body = {
         detail: "登录成功",
         status: 1,
@@ -41,8 +44,9 @@ async function login(ctx) {
           name: name,
           id: id,
           sex: sex,
-          avatar:avatar
-        }
+          avatar: avatar
+        },
+        mes:mes
       };
     }
   }
@@ -77,20 +81,20 @@ async function changePass(ctx) {
     };
   }
 }
-async function uploadAvatar(ctx){
-    const {id}=ctx.request.body
-    let file=ctx.request.files.file
-    let name=''
-    if(file){
-        name=`upload${file.path.split('upload')[1]}`
-    }
-    
-    await update(id,{avatar:name})
-    ctx.body={
-        status:1,
-        detail:'上传成功',
-        url:`http://localhost:80/img/${name}`,
-    }
+async function uploadAvatar(ctx) {
+  const { id } = ctx.request.body;
+  let file = ctx.request.files.file;
+  let name = "";
+  if (file) {
+    name = `upload${file.path.split("upload")[1]}`;
+  }
+
+  await update(id, { avatar: name });
+  ctx.body = {
+    status: 1,
+    detail: "上传成功",
+    url: name
+  };
 }
 module.exports = [
   {
