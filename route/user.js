@@ -1,5 +1,5 @@
 const { insert, update, findByName, findById } = require("../model/user");
-const { findByUesrId } = require("../model/message");
+const { findByUesrId,getDifferentMesCount } = require("../model/message");
 async function register(ctx) {
   const { name, pass } = ctx.request.body;
   let res = await findByName(name);
@@ -36,6 +36,7 @@ async function login(ctx) {
       };
     } else {
       let mes = await findByUesrId(id);
+      let count =await getDifferentMesCount(id)
       mes = mes.map(value => value.dataValues);
       ctx.body = {
         detail: "登录成功",
@@ -46,7 +47,8 @@ async function login(ctx) {
           sex: sex,
           avatar: avatar
         },
-        mes:mes
+        mes:mes,
+        mesCount:count
       };
     }
   }

@@ -10,7 +10,7 @@ const Message=sequelize.define('message',{
     content:{
         type:STRING(1000),
     },
-    to:{
+    toWho:{
         type:INTEGER
     }
 })
@@ -22,8 +22,23 @@ function insert(data){
 function findByUesrId(id){
     return Message.findAll({
         where:{
-            to:id
+            toWho:id
         }
     })
 }
-module.exports={insert,findByUesrId}
+function getDifferentMesCount(id){
+    return sequelize.query(`select type,count(distinct(type)) count from messages group by type,toWho having toWho=${id}`).then((res)=>{
+        return res[0].reduce((pre,cur)=>{
+            pre[cur.type]=cur.count
+            return pre
+        },{})
+    }).then((res)=>{
+        ['official','project','person'].forEach((type)=>{
+            if(!res[type]){
+                res[type]=0
+            }
+        })
+        return res
+    })
+}
+module.exports={insert,findByUesrId,getDifferentMesCount}
