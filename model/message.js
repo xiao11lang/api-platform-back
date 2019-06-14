@@ -41,4 +41,12 @@ function getDifferentMesCount(id){
         return res
     })
 }
-module.exports={insert,findByUesrId,getDifferentMesCount}
+function getMesListByType(rules){
+    return Message.findAll({
+        where:{
+            type:rules.type,
+            toWho:rules.id
+        }
+    })
+}
+module.exports={insert,findByUesrId,getDifferentMesCount,getMesListByType}
