@@ -1,7 +1,9 @@
 const {
   findByUesrId,
   getMesListByType,
-  setMesRead
+  setMesRead,
+  getDifferentMesCount,
+  deleteMes
 } = require("../model/message");
 async function getMessage(ctx) {
   const { id } = ctx.request.body;
@@ -13,8 +15,18 @@ async function getMessage(ctx) {
     list: res
   };
 }
+async function getMesCount(ctx){
+  //const {id}=ctx.request.body
+  const {id}=ctx.state.user
+  let res=await getDifferentMesCount(id)
+  ctx.body={
+    status:1,
+    mesCount:res
+  }
+}
 async function getMessageList(ctx) {
-  const { id, type } = ctx.request.body;
+  const { type } = ctx.request.body;
+  const { id } = ctx.state.user
   let res = await getMesListByType({ id, type });
   res = res.map((value, index) =>
     Object.assign({}, value.dataValues, { index: index })
@@ -24,6 +36,14 @@ async function getMessageList(ctx) {
     detail: "获取消息成功",
     list: res
   };
+}
+async function deleteMessage(ctx){
+  const {id}=ctx.request.body
+  await deleteMes(id)
+  ctx.body={
+    status:1,
+    detail:'删除成功'
+  }
 }
 async function changeMesState(ctx) {
   const { id } = ctx.request.body;
@@ -48,5 +68,14 @@ module.exports = [
     method: "post",
     handler: changeMesState,
     path: "/changeMesState"
+  },{
+    method: "post",
+    handler: deleteMessage,
+    path: "/deleteMes"
+  },
+  {
+    method: "post",
+    handler: getMesCount,
+    path: "/getMesCount"
   }
 ];

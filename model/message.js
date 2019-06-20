@@ -33,17 +33,13 @@ function findByUesrId(id) {
 function getDifferentMesCount(id) {
   return sequelize
     .query(
-      `select type,hasRead,count(distinct(type)) count from messages group by type,toWho,hasRead having toWho=${id}`
+      `select type,count(type) count from (select * from messages where toWho=${id} and hasRead=0) mes group by type;`
     )
     .then(res => {
-      return res[0]
-        .filter(row => {
-          return !row.hasRead;
-        })
-        .reduce((pre, cur) => {
-          pre[cur.type] = cur.count;
-          return pre;
-        }, {});
+      return res[0].reduce((pre, cur) => {
+        pre[cur.type] = cur.count;
+        return pre;
+      }, {});
     })
     .then(res => {
       ["official", "project", "person"].forEach(type => {
@@ -62,19 +58,32 @@ function getMesListByType(rules) {
     }
   });
 }
-function setMesRead(id){
-    return Message.update({
-        hasRead:1
-    },{
-        where:{
-            id:id
-        }
-    })
+function setMesRead(id) {
+  return Message.update(
+    {
+      hasRead: 1
+    },
+    {
+      where: {
+        id: id
+      }
+    }
+  );
+}
+function deleteMes(id) {
+  return Message.destroy(
+    {
+      where: {
+        id: id
+      }
+    }
+  );
 }
 module.exports = {
   insert,
   findByUesrId,
   getDifferentMesCount,
   getMesListByType,
-  setMesRead
+  setMesRead,
+  deleteMes
 };
