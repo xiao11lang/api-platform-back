@@ -3,13 +3,27 @@ const { getDifferentMesCount } = require("../model/message");
 const jwt=require('jsonwebtoken')
 async function register(ctx) {
   const { name, pass } = ctx.request.body;
-  let res = await findByName(name);
-  if (res.length) {
-    ctx.status = 500;
-    ctx.body = {
-      detail: "用户名已经被注册"
-    };
-  } else {
+  try {
+    let res = await findByName(name);
+    if (res.length) {
+      ctx.status = 500;
+      ctx.body = {
+        detail: "用户名已经被注册"
+      };
+    } else {
+      let res=await insert({
+        name: name,
+        password: pass
+      });
+      const {id}=res.dataValues
+      const token=jwt.sign({id:id,name:name},'api_master',{expiresIn: '1h'})
+      ctx.body = {
+        status: 1,
+        detail: "注册成功",
+        token:token
+      };
+    }
+  }catch(e){
     let res=await insert({
       name: name,
       password: pass
@@ -22,6 +36,7 @@ async function register(ctx) {
       token:token
     };
   }
+  
 }
 async function login(ctx) {
   const { name, pass } = ctx.request.body;
@@ -62,14 +77,16 @@ async function login(ctx) {
 async function getInfo(ctx){
   const {id}=ctx.state.user
   let res = await findById(id);
-  const { sex, avatar,name } = res[0].dataValues;
+  const { sex, avatar,name,workTeamId } = res[0].dataValues;
+  console.log(res[0].dataValues)
   ctx.body={
     status:1,
     info: {
       name: name,
       id: id,
       sex: sex,
-      avatar: avatar
+      avatar: avatar,
+      workTeamId:workTeamId
     }
   }
 }
@@ -104,7 +121,7 @@ async function changePass(ctx) {
   }
 }
 async function uploadAvatar(ctx) {
-  const { id } = ctx.request.body;
+  const { id } = ctx.state.user;
   let file = ctx.request.files.file;
   let name = "";
   if (file) {
@@ -117,6 +134,15 @@ async function uploadAvatar(ctx) {
     detail: "上传成功",
     url: name
   };
+}
+async function changeWorkTeam(ctx){
+  const { id } = ctx.state.user;
+  const {teamId}=ctx.request.teamId
+  await update(id,{workTeamId:teamId})
+  ctx.body={
+    status:1,
+    detail:'切换工作组成功'
+  }
 }
 module.exports = [
   {
@@ -147,6 +173,11 @@ module.exports = [
   {
     handler: uploadAvatar,
     path: "/uploadAvatar",
+    method: "post"
+  },
+  {
+    handler: changeWorkTeam,
+    path: "/changeWorkTeam",
     method: "post"
   }
 ];
