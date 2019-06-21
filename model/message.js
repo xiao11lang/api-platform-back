@@ -70,6 +70,20 @@ function setMesRead(id) {
     }
   );
 }
+function setAllMesRead(rules) {
+  const {toWho,type}=rules
+  return Message.update(
+    {
+      hasRead: 1
+    },
+    {
+      where: {
+        toWho:toWho,
+        type:type
+      }
+    }
+  );
+}
 function deleteMes(id) {
   return Message.destroy(
     {
@@ -79,11 +93,25 @@ function deleteMes(id) {
     }
   );
 }
+function deleteAllMes(rules) {
+  const {toWho,type}=rules
+  return Message.destroy(
+    {
+      where: {
+        toWho:toWho,
+        type:type
+      }
+    }
+  );
+}
+
 module.exports = {
   insert,
   findByUesrId,
   getDifferentMesCount,
   getMesListByType,
   setMesRead,
-  deleteMes
+  deleteMes,
+  setAllMesRead,
+  deleteAllMes
 };
