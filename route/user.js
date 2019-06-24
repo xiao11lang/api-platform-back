@@ -78,7 +78,6 @@ async function getInfo(ctx){
   const {id}=ctx.state.user
   let res = await findById(id);
   const { sex, avatar,name,workTeamId } = res[0].dataValues;
-  console.log(res[0].dataValues)
   ctx.body={
     status:1,
     info: {
@@ -137,7 +136,7 @@ async function uploadAvatar(ctx) {
 }
 async function changeWorkTeam(ctx){
   const { id } = ctx.state.user;
-  const {teamId}=ctx.request.teamId
+  const {teamId}=ctx.request.body
   await update(id,{workTeamId:teamId})
   ctx.body={
     status:1,

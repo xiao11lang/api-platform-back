@@ -15,7 +15,8 @@ const User = sequelize.define("user", {
     defaultValue: "male"
   },
   avatar: {
-    type: STRING(100)
+    type: STRING(100),
+    defaultValue:'http://images.china.cn/attachement/jpg/site1000/20140322/0019b91ec90f149786f62a.jpg'
   },
   workTeamId: {
     type: INTEGER,
