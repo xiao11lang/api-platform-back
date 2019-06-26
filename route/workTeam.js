@@ -1,4 +1,9 @@
-const { insert, findByMasterId, findByUniqueId } = require("../model/workTeam");
+const {
+  insert,
+  findByMasterId,
+  findByUniqueId,
+  update
+} = require("../model/workTeam");
 const message = require("../model/message");
 const rs = require("randomstring");
 async function initWorkTeam(ctx) {
@@ -83,6 +88,22 @@ async function getWorkTeamExist(ctx) {
     };
   }
 }
+async function changeTeamName(ctx) {
+  const { id, name } = ctx.request.body;
+  await update(id, { name: name });
+  ctx.body={
+    status:1,
+    detail:'修改成功'
+  }
+}
+async function changeUserRole(ctx) {
+  const { id, role } = ctx.request.body;
+  await update(id, { userRole: role });
+  ctx.body={
+    status:1,
+    detail:'修改成功'
+  }
+}
 module.exports = [
   {
     path: "/initWorkTeam",
@@ -102,6 +123,16 @@ module.exports = [
   {
     path: "/getTeamList",
     handler: getWorkTeamList,
+    method: "post"
+  },
+  {
+    path: "/changeTeamName",
+    handler: changeTeamName,
+    method: "post"
+  },
+  {
+    path: "/changeUserRole",
+    handler: changeUserRole,
     method: "post"
   }
 ];
