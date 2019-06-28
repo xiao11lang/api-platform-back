@@ -43,9 +43,17 @@ function findByUniqueId(id) {
     }
   });
 }
+function destroy(id){
+  return WorkTeam.destroy({
+    where:{
+      id:id
+    }
+  })
+}
 module.exports = {
   insert,
   update,
   findByMasterId,
-  findByUniqueId
+  findByUniqueId,
+  destroy
 };
