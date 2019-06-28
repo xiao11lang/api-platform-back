@@ -2,10 +2,11 @@ const {
   insert,
   findByMasterId,
   findByUniqueId,
-  update,destroy
+  update,
+  destroy
 } = require("../model/workTeam");
 const message = require("../model/message");
-const user=require('../model/user')
+const user = require("../model/user");
 const rs = require("randomstring");
 async function initWorkTeam(ctx) {
   const { id } = ctx.state.user;
@@ -25,6 +26,7 @@ async function initWorkTeam(ctx) {
     },感谢您的使用。`,
     toWho: id
   });
+  await user.update(id, { workTeamId: res.id });
   ctx.body = {
     status: 1,
     detail: "新建成功",
@@ -92,51 +94,53 @@ async function getWorkTeamExist(ctx) {
 async function changeTeamName(ctx) {
   const { id, name } = ctx.request.body;
   await update(id, { name: name });
-  ctx.body={
-    status:1,
-    detail:'修改成功'
-  }
+  ctx.body = {
+    status: 1,
+    detail: "修改成功"
+  };
 }
 async function changeUserRole(ctx) {
   const { id, role } = ctx.request.body;
   await update(id, { userRole: role });
-  ctx.body={
-    status:1,
-    detail:'修改成功'
-  }
+  ctx.body = {
+    status: 1,
+    detail: "修改成功"
+  };
 }
 async function transferTeam(ctx) {
   const { id, userId } = ctx.request.body;
-  let oldMasterId=ctx.state.user.id
+  let oldMasterId = ctx.state.user.id;
   await update(id, { master: userId });
-  let res=await findByMasterId(oldMasterId)
-  if(res.length>0){
-    await user.update(oldMasterId,{workTeamId:res[0].dataValues.id})
-  }else{
-    await user.update(oldMasterId,{workTeamId:0})
+  let res = await findByMasterId(oldMasterId);
+  if (res.length > 0) {
+    await user.update(oldMasterId, { workTeamId: res[0].dataValues.id });
+  } else {
+    await user.update(oldMasterId, { workTeamId: 0 });
   }
-  ctx.body={
-    status:1,
-    detail:'转让成功'
-  }
+  ctx.body = {
+    status: 1,
+    detail: "转让成功"
+  };
 }
-async function deleteTeam(ctx){
-  const {id}=ctx.request.body
-  const userId=ctx.state.user.id
-  await destroy(id)
-  let res=await findByMasterId(userId)
-  if(res.length===0){
-    await user.update(userId,{workTeamId:0})
-    ctx.body={
-      status:1,detail:'删除成功',
-      list:[]
-    }
-  }else{
-    await user.update(userId,{workTeamId:res[0].dataValues.id})
-    ctx.body={
-      status:1,detail:'删除成功',
-      list:res.map((row)=>row.dataValues)
-    }
+async function deleteTeam(ctx) {
+  const { id } = ctx.request.body;
+  const userId = ctx.state.user.id;
+  await destroy(id);
+  let res = await findByMasterId(userId);
+  if (res.length === 0) {
+    await user.update(userId, { workTeamId: 0 });
+    ctx.body = {
+      status: 1,
+      detail: "删除成功",
+      list: []
+    };
+  } else {
+    await user.update(userId, { workTeamId: res[0].dataValues.id });
+    ctx.body = {
+      status: 1,
+      detail: "删除成功",
+      list: res.map(row => row.dataValues)
+    };
   }
 }
 module.exports = [
