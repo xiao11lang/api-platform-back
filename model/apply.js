@@ -26,7 +26,7 @@ function update(id, values) {
 function getById(id) {
   return sequelize
     .query(
-      `select U.name,U.sex,A.* from users U, applies A where A.master_id=U.id and U.id=${id}`
+      `select U.name,U.sex,A.* from users U, applies A where A.from_id=U.id and A.master_id=${id}`
     )
     .then(res => {
       if (res.length) {
@@ -34,7 +34,7 @@ function getById(id) {
         res.forEach(item => {
           result = result.concat(item);
         });
-        return result;
+        return [...new Set(result)];
       } else {
         return [];
       }
