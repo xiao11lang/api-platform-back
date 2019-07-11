@@ -87,7 +87,9 @@ async function getWorkTeamExist(ctx) {
   } else {
     ctx.body = {
       status: 1,
-      detail: "查询成功"
+      detail: "查询成功",
+      id:res[0].dataValues.id,
+      masterId:res[0].dataValues.master
     };
   }
 }

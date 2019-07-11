@@ -21,7 +21,7 @@ const User = sequelize.define("user", {
   workTeamId: {
     type: INTEGER,
     defaultValue: 0
-  }
+  }//当前的工作组id
 });
 User.afterCreate(async user => {
   const id = user.dataValues.id;
