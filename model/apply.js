@@ -54,10 +54,19 @@ function destroy(id) {
     }
   });
 }
+function checkApplyExist(rules){
+  return Apply.findAll({
+    where:{
+      team_id:rules.teamId,
+      from_id:rules.fromId
+    }
+  })
+}
 module.exports = {
   insert,
   update,
   destroy,
   getById,
-  getByTeamId
+  getByTeamId,
+  checkApplyExist
 };

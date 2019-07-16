@@ -1,36 +1,54 @@
-const { insert, getById, destroy, getByTeamId } = require("../model/apply");
+const {
+  insert,
+  destroy,
+  getByTeamId,
+  checkApplyExist
+} = require("../model/apply");
 const { findById } = require("../model/workTeam");
 const authority = require("../model/authority");
 const user = require("../model/user");
 async function addApply(ctx) {
   const { id } = ctx.state.user;
   const { teamId, masterId } = ctx.request.body;
-  await insert({
-    from_id: id,
-    team_id: teamId,
-    master_id: masterId
+  let res = await checkApplyExist({
+    fromId: id,
+    teamId: teamId
   });
-  ctx.body = {
-    status: 1,
-    detail: "申请成功"
-  };
+  if (res.length) {
+    ctx.status = 500;
+    ctx.body = {
+      detail: "您已经提交申请"
+    };
+  } else {
+    await insert({
+      from_id: id,
+      team_id: teamId,
+      master_id: masterId
+    });
+    ctx.body = {
+      status: 1,
+      detail: "申请成功"
+    };
+  }
 }
 async function getApply(ctx) {
-  let id=ctx.state.user.id
+  let id = ctx.state.user.id;
   let res = await getByTeamId(25);
   let userArr = res.map(item => {
     return item.dataValues.from_id;
   });
   let userInfo = await user.findByIdArr(userArr);
-  res = res.map(item => {
-    let curUser = userInfo.filter(user => {
-      return user.dataValues.id == item.from_id;
-    });
-    return Object.assign({}, item.dataValues, {
-      name: curUser[0].dataValues.name,
-      sex: curUser[0].dataValues.sex
-    });
-  }).filter((apply)=>apply.master_id===id);
+  res = res
+    .map(item => {
+      let curUser = userInfo.filter(user => {
+        return user.dataValues.id == item.from_id;
+      });
+      return Object.assign({}, item.dataValues, {
+        name: curUser[0].dataValues.name,
+        sex: curUser[0].dataValues.sex
+      });
+    })
+    .filter(apply => apply.master_id === id);
   ctx.body = {
     status: 1,
     detail: "查询成功",
