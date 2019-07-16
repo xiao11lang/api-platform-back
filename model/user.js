@@ -1,4 +1,4 @@
-const { STRING, INTEGER } = require("sequelize");
+const { STRING, INTEGER, Op } = require("sequelize");
 const sequelize = require("./instance");
 const message = require("./message");
 const wt = require("./workTeam");
@@ -16,12 +16,13 @@ const User = sequelize.define("user", {
   },
   avatar: {
     type: STRING(100),
-    defaultValue:'http://images.china.cn/attachement/jpg/site1000/20140322/0019b91ec90f149786f62a.jpg'
+    defaultValue:
+      "http://images.china.cn/attachement/jpg/site1000/20140322/0019b91ec90f149786f62a.jpg"
   },
   workTeamId: {
     type: INTEGER,
     defaultValue: 0
-  }//当前的工作组id
+  } //当前的工作组id
 });
 User.afterCreate(async user => {
   const id = user.dataValues.id;
@@ -83,9 +84,19 @@ function update(id, values) {
     }
   });
 }
+function findByIdArr(arr) {
+  return User.findAll({
+    where: {
+      id: {
+        [Op.in]: arr
+      }
+    }
+  });
+}
 module.exports = {
   insert,
   update,
   findByName,
-  findById
+  findById,
+  findByIdArr
 };

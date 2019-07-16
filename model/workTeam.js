@@ -43,6 +43,13 @@ function findByUniqueId(id) {
     }
   });
 }
+function findById(id) {
+  return WorkTeam.findAll({
+    where: {
+      id: id
+    }
+  });
+}
 function destroy(id){
   return WorkTeam.destroy({
     where:{
@@ -55,5 +62,6 @@ module.exports = {
   update,
   findByMasterId,
   findByUniqueId,
+  findById,
   destroy
 };

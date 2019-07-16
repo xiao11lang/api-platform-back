@@ -1,4 +1,4 @@
-const { STRING, INTEGER } = require("sequelize");
+const { INTEGER } = require("sequelize");
 const sequelize = require("./instance");
 const Apply = sequelize.define("apply", {
   from_id: {
@@ -39,6 +39,13 @@ function getById(id) {
         return [];
       }
     });
+} //根据用户id查询申请
+function getByTeamId(id) {
+  return Apply.findAll({
+    where: {
+      team_id: id
+    }
+  });
 }
 function destroy(id) {
   return Apply.destroy({
@@ -51,5 +58,6 @@ module.exports = {
   insert,
   update,
   destroy,
-  getById
+  getById,
+  getByTeamId
 };
