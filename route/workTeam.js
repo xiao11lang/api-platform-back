@@ -3,10 +3,12 @@ const {
   findByMasterId,
   findByUniqueId,
   update,
-  destroy
+  destroy,
+  findByIdArr
 } = require("../model/workTeam");
 const message = require("../model/message");
 const user = require("../model/user");
+const authority = require("../model/authority");
 const rs = require("randomstring");
 async function initWorkTeam(ctx) {
   const { id } = ctx.state.user;
@@ -50,6 +52,20 @@ async function getWorkTeamList(ctx) {
   const { id } = ctx.state.user;
   const { teamId } = ctx.request.body;
   let res = await findByMasterId(id);
+  let auths = await authority.getByUserId(id);//加入的工作组
+  let teams = [];
+  if (auths.length) {
+    let teamArr = auths.map(auth => {
+      return auth.dataValues.team_id;
+    });
+    let otherTeams = await findByIdArr(teamArr);
+    teams=otherTeams.map((team)=>{
+      let userRole=auths.filter((auth)=>auth.dataValues.team_id===team.id)[0].userRole //获取所处工作组的权限
+      return Object.assign({},team.dataValues,{
+        userRole:userRole
+      })
+    })
+  }
   res = res.map(team => {
     return team.dataValues;
   });
@@ -63,6 +79,7 @@ async function getWorkTeamList(ctx) {
   if (curTeam) {
     res.splice(curIndex, 1);
     res.unshift(curTeam);
+    res=res.concat(teams)
     ctx.body = {
       status: "1",
       detail: "获取工作组信息成功",
@@ -88,8 +105,8 @@ async function getWorkTeamExist(ctx) {
     ctx.body = {
       status: 1,
       detail: "查询成功",
-      id:res[0].dataValues.id,
-      masterId:res[0].dataValues.master
+      id: res[0].dataValues.id,
+      masterId: res[0].dataValues.master
     };
   }
 }

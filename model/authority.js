@@ -30,8 +30,24 @@ function destroy(id) {
     }
   });
 }
+function getByTeamId(id) {
+  return Authority.findAll({
+    where: {
+      team_id: id
+    }
+  });
+}
+function getByUserId(id) {
+  return Authority.findAll({
+    where: {
+      user_id: id
+    }
+  });
+}
 module.exports = {
   insert,
   update,
-  destroy
+  destroy,
+  getByTeamId,
+  getByUserId
 };

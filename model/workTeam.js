@@ -1,4 +1,4 @@
-const { STRING, INTEGER } = require("sequelize");
+const { STRING, INTEGER,Op } = require("sequelize");
 const sequelize = require("./instance");
 const WorkTeam = sequelize.define("work_team", {
   name: {
@@ -50,6 +50,15 @@ function findById(id) {
     }
   });
 }
+function findByIdArr(arr) {
+  return WorkTeam.findAll({
+    where: {
+      id: {
+        [Op.in]:arr
+      }
+    }
+  });
+}
 function destroy(id){
   return WorkTeam.destroy({
     where:{
@@ -63,5 +72,6 @@ module.exports = {
   findByMasterId,
   findByUniqueId,
   findById,
+  findByIdArr,
   destroy
 };
