@@ -1,4 +1,4 @@
-const { getByTeamId } = require("../model/authority");
+const { getByTeamId,destroy } = require("../model/authority");
 const user = require("../model/user");
 async function getAuthorities(ctx) {
   const { teamId } = ctx.request.body;
@@ -23,10 +23,23 @@ async function getAuthorities(ctx) {
     list: res
   };
 }
+async function deleteAuthority(ctx){
+    const id=ctx.request.body.id
+    await destroy(id)
+    ctx.body={
+        status:1,
+        detail:'删除成功'
+    }
+}
 module.exports = [
   {
     path: "/getAuthorities",
     handler: getAuthorities,
+    method: "post"
+  },
+  {
+    path: "/deleteAuthority",
+    handler: deleteAuthority,
     method: "post"
   }
 ];
