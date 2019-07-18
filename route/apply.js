@@ -10,30 +10,43 @@ const user = require("../model/user");
 async function addApply(ctx) {
   const { id } = ctx.state.user;
   const { teamId, masterId } = ctx.request.body;
-  let res = await checkApplyExist({
-    fromId: id,
+  let auth = await authority.checkAuthorityExist({
+    userId: id,
     teamId: teamId
   });
-  if (res.length) {
+  if (auth.length) {
     ctx.status = 500;
     ctx.body = {
-      detail: "您已经提交申请"
+      detail: "您已经经在该工作组中",
+      status: 1
     };
   } else {
-    await insert({
-      from_id: id,
-      team_id: teamId,
-      master_id: masterId
+    let res = await checkApplyExist({
+      fromId: id,
+      teamId: teamId
     });
-    ctx.body = {
-      status: 1,
-      detail: "申请成功"
-    };
+    if (res.length) {
+      ctx.status = 500;
+      ctx.body = {
+        detail: "您已经提交申请"
+      };
+    } else {
+      await insert({
+        from_id: id,
+        team_id: teamId,
+        master_id: masterId
+      });
+      ctx.body = {
+        status: 1,
+        detail: "申请成功"
+      };
+    }
   }
 }
 async function getApply(ctx) {
   let id = ctx.state.user.id;
-  let res = await getByTeamId(25);
+  let teamId=ctx.request.body.teamId
+  let res = await getByTeamId(teamId);
   let userArr = res.map(item => {
     return item.dataValues.from_id;
   });
@@ -62,12 +75,21 @@ async function agreeApply(ctx) {
   await authority.insert({
     user_id: fromId,
     team_id: teamId,
+    master_id: id,
     userRole: res[0].dataValues.userRole
   });
   await destroy(applyId);
   ctx.body = {
     status: 1,
     detail: "操作成功"
+  };
+}
+async function deleteApply(ctx){
+  const id=ctx.request.body.applyId
+  await destroy(id)
+  ctx.body = {
+    status: 1,
+    detail: "删除成功"
   };
 }
 module.exports = [
@@ -79,11 +101,16 @@ module.exports = [
   {
     path: "/getApply",
     handler: getApply,
-    method: "get"
+    method: "post"
   },
   {
     path: "/agreeApply",
     handler: agreeApply,
+    method: "post"
+  },
+  {
+    path: "/deleteApply",
+    handler: deleteApply,
     method: "post"
   }
 ];

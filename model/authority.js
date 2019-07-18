@@ -7,6 +7,9 @@ const Authority = sequelize.define("authority", {
   team_id: {
     type: INTEGER
   },
+  master_id: {
+    type: INTEGER
+  },
   userRole: {
     type: STRING(10)
   }
@@ -44,10 +47,25 @@ function getByUserId(id) {
     }
   });
 }
+function getByRules(rule) {
+  return Authority.findAll({
+    where: rule
+  });
+}
+function checkAuthorityExist(rules) {
+  return Authority.findAll({
+    where: {
+      team_id: rules.teamId,
+      user_id: rules.userId
+    }
+  });
+}
 module.exports = {
   insert,
   update,
   destroy,
   getByTeamId,
-  getByUserId
+  getByUserId,
+  checkAuthorityExist,
+  getByRules
 };

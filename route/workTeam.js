@@ -69,6 +69,7 @@ async function getWorkTeamList(ctx) {
   res = res.map(team => {
     return team.dataValues;
   });
+  res=res.concat(teams)
   let curIndex, curTeam;
   res.forEach((team, index) => {
     if (team.id === teamId) {
@@ -79,7 +80,6 @@ async function getWorkTeamList(ctx) {
   if (curTeam) {
     res.splice(curIndex, 1);
     res.unshift(curTeam);
-    res=res.concat(teams)
     ctx.body = {
       status: "1",
       detail: "获取工作组信息成功",
