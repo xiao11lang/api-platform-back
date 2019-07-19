@@ -1,5 +1,6 @@
 const { STRING, INTEGER,Op } = require("sequelize");
 const sequelize = require("./instance");
+const authority=require('./authority')
 const WorkTeam = sequelize.define("work_team", {
   name: {
     type: STRING(30)
@@ -17,6 +18,10 @@ const WorkTeam = sequelize.define("work_team", {
     type: STRING(10)
   },
 });
+WorkTeam.afterDelete(async team=>{
+  const id=team.id
+  await authority.destroy(id)
+})
 function insert(data) {
   return WorkTeam.sync().then(() => {
     return WorkTeam.create(data);

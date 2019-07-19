@@ -17,7 +17,7 @@ async function initWorkTeam(ctx) {
     master: id,
     unique_id: (id + rs.generate(40)).substring(0, 40),
     autoBind: 0,
-    userRole: ""
+    userRole: "admin"
   };
   let res = await insert(data);
   await message.insert({
