@@ -5,8 +5,12 @@ const {
   getDifferentMesCount,
   deleteMes,
   setAllMesRead,
-  deleteAllMes
+  deleteAllMes,
+  insert,
+  update
 } = require("../model/message");
+const user = require("../model/user");
+const authority = require("../model/authority");
 async function getMessage(ctx) {
   const { id } = ctx.request.body;
   let res = await findByUesrId(id);
@@ -58,21 +62,87 @@ async function changeMesState(ctx) {
 async function setAllMessageRead(ctx) {
   const { type } = ctx.request.body;
   const { id } = ctx.state.user;
-  let res=await setAllMesRead({ toWho: id, type: type });
+  let res = await setAllMesRead({ toWho: id, type: type });
   ctx.body = {
     status: 1,
     detail: "操作成功",
-    affectedCount:res[0]
+    affectedCount: res[0]
   };
 }
 async function deleteAllMessage(ctx) {
   const { type } = ctx.request.body;
   const { id } = ctx.state.user;
-  let res=await deleteAllMes({ toWho: id, type: type });
+  let res = await deleteAllMes({ toWho: id, type: type });
   ctx.body = {
     status: 1,
     detail: "操作成功",
-    affectedCount:res[0]
+    affectedCount: res[0]
+  };
+}
+async function inviteMessage(ctx) {
+  const { name, teamName, fromName, fromId, teamId } = ctx.request.body;
+  let userRes = await user.findByName(name);
+  if (userRes.length) {
+    await insert({
+      type: "official",
+      title: "加入工作组邀请",
+      content: `尊敬的${name}您好，${fromName}邀请您加入他的工作组${teamName}`,
+      toWho: userRes[0].dataValues.id,
+      extra: "invite",
+      extraInfo: JSON.stringify({
+        masterId: fromId,
+        userId: userRes[0].dataValues.id,
+        teamId: teamId
+      })
+    });
+    ctx.body = {
+      status: 1,
+      detail: "邀请成功"
+    };
+  } else {
+    ctx.status = 500;
+    ctx.body = {
+      detail: "该用户不存在"
+    };
+  }
+}
+async function agreeInvite(ctx) {
+  const { id, extraInfo } = ctx.request.body;
+  const userId = ctx.state.user.id;
+  await update(id, {
+    extraStatus: "agree"
+  });
+  const parseInfo = JSON.parse(extraInfo);
+  const { teamId, masterId } = parseInfo;
+  let auth = await authority.checkAuthorityExist({
+    userId: userId,
+    teamId: teamId
+  });
+  if (auth.length) {
+    ctx.body = {
+      detail: "你已经在该工作组中"
+    };
+  } else {
+    await authority.insert({
+      user_id: userId,
+      master_id: masterId,
+      team_id: teamId,
+      userRole: "admin"
+    });
+    ctx.body = {
+      detail: "已经同意",
+      status: 1
+    };
+  }
+}
+async function refuseInvite(ctx) {
+  const id = ctx.request.body.id;
+  await update(id, {
+    extraStatus: "refuse"
+  });
+  ctx.body = {
+    status: 1,
+    detail: "已经拒绝"
   };
 }
 module.exports = [
@@ -110,5 +180,20 @@ module.exports = [
     method: "post",
     handler: getMesCount,
     path: "/getMesCount"
+  },
+  {
+    method: "post",
+    handler: inviteMessage,
+    path: "/inviteMessage"
+  },
+  {
+    method: "post",
+    handler: agreeInvite,
+    path: "/agreeInvite"
+  },
+  {
+    method: "post",
+    handler: refuseInvite,
+    path: "/refuseInvite"
   }
 ];

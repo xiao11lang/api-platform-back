@@ -18,7 +18,7 @@ const WorkTeam = sequelize.define("work_team", {
     type: STRING(10)
   },
 });
-WorkTeam.afterDelete(async team=>{
+WorkTeam.afterDestroy(async team=>{
   const id=team.id
   await authority.destroy(id)
 })

@@ -16,6 +16,18 @@ const Message = sequelize.define("message", {
   hasRead: {
     type: INTEGER,
     defaultValue: 0
+  },
+  extra:{
+    type:STRING,
+    defaultValue:''
+  },
+  extraStatus:{
+    type:STRING,
+    defaultValue:''
+  },
+  extraInfo:{
+    type:STRING,
+    defaultValue:''
   }
 });
 function insert(data) {
@@ -104,7 +116,13 @@ function deleteAllMes(rules) {
     }
   );
 }
-
+function update(id, values) {
+  return Message.update(values, {
+    where: {
+      id: id
+    }
+  });
+}
 module.exports = {
   insert,
   findByUesrId,
@@ -113,5 +131,6 @@ module.exports = {
   setMesRead,
   deleteMes,
   setAllMesRead,
-  deleteAllMes
+  deleteAllMes,
+  update
 };
