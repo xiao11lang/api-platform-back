@@ -137,7 +137,7 @@ async function inviteMessage(ctx) {
   }
 }
 async function agreeInvite(ctx) {
-  const { id, extraInfo } = ctx.request.body
+  const { id, extraInfo,name } = ctx.request.body
   const userId = ctx.state.user.id
   await update(id, {
     extraStatus: 'agree'
@@ -153,6 +153,12 @@ async function agreeInvite(ctx) {
       detail: '你已经在该工作组中'
     }
   } else {
+    await insert({
+      title: '加入工作组确认',
+      content: `您好，${name}已经同意加入您的工作组，请知悉`,
+      toWho: masterId,
+      type:'person'
+    })
     await authority.insert({
       user_id: userId,
       master_id: masterId,
