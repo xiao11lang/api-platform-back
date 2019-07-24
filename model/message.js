@@ -39,7 +39,8 @@ function findByUesrId(id) {
   return Message.findAll({
     where: {
       toWho: id
-    }
+    },
+    order:[['createdAt','DESC']]
   });
 }
 function getDifferentMesCount(id) {

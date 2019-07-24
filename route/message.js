@@ -8,192 +8,222 @@ const {
   deleteAllMes,
   insert,
   update
-} = require("../model/message");
-const user = require("../model/user");
-const authority = require("../model/authority");
+} = require('../model/message')
+const user = require('../model/user')
+const authority = require('../model/authority')
 async function getMessage(ctx) {
-  const { id } = ctx.request.body;
-  let res = await findByUesrId(id);
-  res = res.map(value => value.dataValues);
+  const { id } = ctx.state.user
+  let mes = await findByUesrId(id)
+  mes = mes.map(value => value.dataValues)
+  let res = {
+    official: {
+      unRead: 0,
+      list: []
+    },
+    project: {
+      unRead: 0,
+      list: []
+    },
+    person: {
+      unRead: 0,
+      list: []
+    }
+  }
+  mes.forEach(item => {
+    if (!item.hasRead) {
+      res[item.type].unRead++
+    }
+    switch (item.type) {
+      case 'official':
+        res.official.list.push(item)
+        break
+      case 'project':
+        res.project.list.push(item)
+        break
+      case 'person':
+        res.person.list.push(item)
+        break
+    }
+  })
   ctx.body = {
     status: 1,
-    detail: "获取消息成功",
+    detail: '获取消息成功',
     list: res
-  };
+  }
 }
 async function getMesCount(ctx) {
   //const {id}=ctx.request.body
-  const { id } = ctx.state.user;
-  let res = await getDifferentMesCount(id);
+  const { id } = ctx.state.user
+  let res = await getDifferentMesCount(id)
   ctx.body = {
     status: 1,
     mesCount: res
-  };
+  }
 }
 async function getMessageList(ctx) {
-  const { type } = ctx.request.body;
-  const { id } = ctx.state.user;
-  let res = await getMesListByType({ id, type });
+  const { type } = ctx.request.body
+  const { id } = ctx.state.user
+  let res = await getMesListByType({ id, type })
   res = res.map((value, index) =>
     Object.assign({}, value.dataValues, { index: index })
-  );
+  )
   ctx.body = {
     status: 1,
-    detail: "获取消息成功",
+    detail: '获取消息成功',
     list: res
-  };
+  }
 }
 async function deleteMessage(ctx) {
-  const { id } = ctx.request.body;
-  await deleteMes(id);
+  const { id } = ctx.request.body
+  await deleteMes(id)
   ctx.body = {
     status: 1,
-    detail: "删除成功"
-  };
+    detail: '删除成功'
+  }
 }
 async function changeMesState(ctx) {
-  const { id } = ctx.request.body;
-  await setMesRead(id);
+  const { id } = ctx.request.body
+  await setMesRead(id)
   ctx.body = {
     status: 1,
-    detail: "消息已阅读"
-  };
+    detail: '消息已阅读'
+  }
 }
 async function setAllMessageRead(ctx) {
-  const { type } = ctx.request.body;
-  const { id } = ctx.state.user;
-  let res = await setAllMesRead({ toWho: id, type: type });
+  const { type } = ctx.request.body
+  const { id } = ctx.state.user
+  let res = await setAllMesRead({ toWho: id, type: type })
   ctx.body = {
     status: 1,
-    detail: "操作成功",
+    detail: '操作成功',
     affectedCount: res[0]
-  };
+  }
 }
 async function deleteAllMessage(ctx) {
-  const { type } = ctx.request.body;
-  const { id } = ctx.state.user;
-  let res = await deleteAllMes({ toWho: id, type: type });
+  const { type } = ctx.request.body
+  const { id } = ctx.state.user
+  let res = await deleteAllMes({ toWho: id, type: type })
   ctx.body = {
     status: 1,
-    detail: "操作成功",
+    detail: '操作成功',
     affectedCount: res[0]
-  };
+  }
 }
 async function inviteMessage(ctx) {
-  const { name, teamName, fromName, fromId, teamId } = ctx.request.body;
-  let userRes = await user.findByName(name);
+  const { name, teamName, fromName, fromId, teamId } = ctx.request.body
+  let userRes = await user.findByName(name)
   if (userRes.length) {
     await insert({
-      type: "official",
-      title: "加入工作组邀请",
+      type: 'official',
+      title: '加入工作组邀请',
       content: `尊敬的${name}您好，${fromName}邀请您加入他的工作组${teamName}`,
       toWho: userRes[0].dataValues.id,
-      extra: "invite",
+      extra: 'invite',
       extraInfo: JSON.stringify({
         masterId: fromId,
         userId: userRes[0].dataValues.id,
         teamId: teamId
       })
-    });
+    })
     ctx.body = {
       status: 1,
-      detail: "邀请成功"
-    };
+      detail: '邀请成功'
+    }
   } else {
-    ctx.status = 500;
+    ctx.status = 500
     ctx.body = {
-      detail: "该用户不存在"
-    };
+      detail: '该用户不存在'
+    }
   }
 }
 async function agreeInvite(ctx) {
-  const { id, extraInfo } = ctx.request.body;
-  const userId = ctx.state.user.id;
+  const { id, extraInfo } = ctx.request.body
+  const userId = ctx.state.user.id
   await update(id, {
-    extraStatus: "agree"
-  });
-  const parseInfo = JSON.parse(extraInfo);
-  const { teamId, masterId } = parseInfo;
+    extraStatus: 'agree'
+  })
+  const parseInfo = JSON.parse(extraInfo)
+  const { teamId, masterId } = parseInfo
   let auth = await authority.checkAuthorityExist({
     userId: userId,
     teamId: teamId
-  });
+  })
   if (auth.length) {
     ctx.body = {
-      detail: "你已经在该工作组中"
-    };
+      detail: '你已经在该工作组中'
+    }
   } else {
     await authority.insert({
       user_id: userId,
       master_id: masterId,
       team_id: teamId,
-      userRole: "admin"
-    });
+      userRole: 'admin'
+    })
     ctx.body = {
-      detail: "已经同意",
+      detail: '已经同意',
       status: 1
-    };
+    }
   }
 }
 async function refuseInvite(ctx) {
-  const id = ctx.request.body.id;
+  const id = ctx.request.body.id
   await update(id, {
-    extraStatus: "refuse"
-  });
+    extraStatus: 'refuse'
+  })
   ctx.body = {
     status: 1,
-    detail: "已经拒绝"
-  };
+    detail: '已经拒绝'
+  }
 }
 module.exports = [
   {
-    method: "post",
+    method: 'post',
     handler: getMessage,
-    path: "/getMessage"
+    path: '/getMessage'
   },
   {
-    method: "post",
+    method: 'post',
     handler: getMessageList,
-    path: "/getMessageList"
+    path: '/getMessageList'
   },
   {
-    method: "post",
+    method: 'post',
     handler: changeMesState,
-    path: "/changeMesState"
+    path: '/changeMesState'
   },
   {
-    method: "post",
+    method: 'post',
     handler: setAllMessageRead,
-    path: "/setAllMes"
+    path: '/setAllMes'
   },
   {
-    method: "post",
+    method: 'post',
     handler: deleteMessage,
-    path: "/deleteMes"
+    path: '/deleteMes'
   },
   {
-    method: "post",
+    method: 'post',
     handler: deleteAllMessage,
-    path: "/deleteAllMes"
+    path: '/deleteAllMes'
   },
   {
-    method: "post",
+    method: 'post',
     handler: getMesCount,
-    path: "/getMesCount"
+    path: '/getMesCount'
   },
   {
-    method: "post",
+    method: 'post',
     handler: inviteMessage,
-    path: "/inviteMessage"
+    path: '/inviteMessage'
   },
   {
-    method: "post",
+    method: 'post',
     handler: agreeInvite,
-    path: "/agreeInvite"
+    path: '/agreeInvite'
   },
   {
-    method: "post",
+    method: 'post',
     handler: refuseInvite,
-    path: "/refuseInvite"
+    path: '/refuseInvite'
   }
-];
+]
