@@ -8,11 +8,19 @@ class BaseModel {
       return this.model.create(data)
     })
   }
+  findById(id) {
+    return this.model.findAll({
+      where: {
+        id: id
+      }
+    })
+  }
   update(id, values) {
     return this.model.update(values, {
       where: {
         id: id
-      }
+      },
+      individualHooks: true
     })
   }
   destroy(id) {
@@ -23,4 +31,4 @@ class BaseModel {
     })
   }
 }
-module.exports=BaseModel
+module.exports = BaseModel

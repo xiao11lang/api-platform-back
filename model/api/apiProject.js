@@ -31,18 +31,28 @@ const model = {
   document_number: {
     type: INTEGER,
     defaultValue: 0
+  },
+  random: {
+    type: STRING
   }
 }
 class APIProject extends BaseModel {
   constructor(name, model) {
     super(name, model)
   }
-  findByTeamId(id){
-      return this.model.findAll({
-          where:{
-              team_id:id
-          }
-      })
+  findByTeamId(id) {
+    return this.model.findAll({
+      where: {
+        team_id: id
+      }
+    })
+  }
+  findById(id) {
+    return this.model.findAll({
+      where: {
+        id: id
+      }
+    })
   }
 }
 module.exports = new APIProject(name, model)
