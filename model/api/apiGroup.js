@@ -3,6 +3,7 @@ const BaseModel = require('../base')
 const activity = require('./apiActivity')
 const project = require('./apiProject')
 const user = require('../user')
+const instance = require('./apiInstance')
 const name = 'api_group'
 const model = {
   project_id: {
@@ -44,11 +45,17 @@ class APIGroup extends BaseModel {
         activity_type: 'modify',
         to_object: 'group',
         operator: from[0].dataValues.name,
-        description: `${from[0].dataValues.name}修改了分组(${oldName})的名称,新分组名为(${name})`
+        description: `${
+          from[0].dataValues.name
+        }修改了分组(${oldName})的名称,新分组名为(${name})`
       })
       project.update(project_id, {
         random: Math.random().toString()
       })
+    })
+    this.model.afterDestroy(group => {
+      const { id } = group.dataValues
+      instance.destroyByGroupId(id)
     })
   }
   findByProjectId(id) {

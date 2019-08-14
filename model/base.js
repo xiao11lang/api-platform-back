@@ -27,7 +27,8 @@ class BaseModel {
     return this.model.destroy({
       where: {
         id: id
-      }
+      },
+      individualHooks: true
     })
   }
 }
