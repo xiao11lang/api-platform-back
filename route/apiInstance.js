@@ -1,6 +1,14 @@
 const instance = require('../model/api/apiInstance')
 async function addApiInstance(ctx) {
-  const { meta, description, request, response, projectId,updator } = ctx.request.body
+  const {
+    meta,
+    description,
+    request,
+    response,
+    projectId,
+    updator,
+    result
+  } = ctx.request.body
   await instance.insert({
     ...meta,
     description,
@@ -8,7 +16,8 @@ async function addApiInstance(ctx) {
     response,
     project_id: projectId,
     group_id: meta.group,
-    updator
+    updator,
+    result
   })
   ctx.body = {
     detail: '新建成功',
@@ -41,6 +50,14 @@ async function deleteApi(ctx) {
     status: 1
   }
 }
+async function updateApi(ctx) {
+  const { id,data } = ctx.request.body
+  await instance.update(id, data)
+  ctx.body = {
+    detail: '保存成功',
+    status: 1
+  }
+}
 
 module.exports = [
   {
@@ -61,6 +78,11 @@ module.exports = [
   {
     handler: deleteApi,
     path: '/deleteApi',
+    method: 'post'
+  },
+  {
+    handler: updateApi,
+    path: '/updateApi',
     method: 'post'
   }
 ]
