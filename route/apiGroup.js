@@ -35,23 +35,8 @@ async function modifyGroup(ctx) {
   }
 }
 async function deleteGroup(ctx) {
-  const { id,projectId } = ctx.request.body
-  const userId = ctx.state.user.id
-  let res=await group.findById(id)
+  const { id } = ctx.request.body
   await group.destroy(id)
-  let from = await user.findById(userId)
-  activity.insert({
-    project_id: projectId,
-    activity_type: 'delete',
-    to_object: 'group',
-    operator: from[0].dataValues.name,
-    description: `${
-      from[0].dataValues.name
-    }删除了分组(${res[0].dataValues.name})`
-  })
-  project.update(id, {
-    random: Math.random().toString()
-  })
   ctx.body = {
     detail: '删除成功',
     status: 1

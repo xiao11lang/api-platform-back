@@ -51,8 +51,25 @@ async function deleteApi(ctx) {
   }
 }
 async function updateApi(ctx) {
-  const { id,data } = ctx.request.body
-  await instance.update(id, data)
+  const {id,data}=ctx.request.body
+  const {
+    meta,
+    description,
+    request,
+    response,
+    updator,
+    result
+  } = data
+  meta.group_id=meta.group
+  await instance.update(id, {
+    ...meta,
+    description,
+    request,
+    response,
+    group_id: meta.group,
+    updator,
+    result
+  })
   ctx.body = {
     detail: '保存成功',
     status: 1

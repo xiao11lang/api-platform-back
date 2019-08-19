@@ -53,9 +53,21 @@ class APIGroup extends BaseModel {
         random: Math.random().toString()
       })
     })
-    this.model.afterDestroy(group => {
+    this.model.afterDestroy(async group => {
       const { id } = group.dataValues
       instance.destroyByGroupId(id)
+      const { project_id, name, operator_id } = group.dataValues
+      let from = await user.findById(operator_id)
+      activity.insert({
+        project_id: project_id,
+        activity_type: 'add',
+        to_object: 'group',
+        operator: from[0].dataValues.name,
+        description: `${from[0].dataValues.name}删除了分组（${name}）`
+      })
+      project.update(project_id, {
+        random: Math.random().toString()
+      })
     })
   }
   findByProjectId(id) {
