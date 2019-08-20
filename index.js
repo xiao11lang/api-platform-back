@@ -13,6 +13,7 @@ app.use((ctx, next) => {
     return next()
   }
   if (path === 'login' || path === 'register' || (user && user.id)) {
+    ctx.username = ctx.state.user.name
     return next()
   } else {
     ctx.status = 401
@@ -20,10 +21,6 @@ app.use((ctx, next) => {
       detail: '未认证'
     }
   }
-})
-app.use((ctx, next) => {
-  ctx.username = ctx.state.user.name
-  return next()
 })
 app.use(
   koaBody({

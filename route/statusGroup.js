@@ -2,7 +2,8 @@ const group = require('../model/status/statusGroup')
 const activity = require('../model/api/apiActivity')
 const project = require('../model/api/apiProject')
 async function addTopGroup(ctx) {
-  const { name, project_id, operator } = ctx.request.body
+  const { name, project_id } = ctx.request.body
+  const operator = ctx.username
   const res = await group.insert({
     name,
     project_id,
@@ -25,7 +26,7 @@ async function getGroups(ctx) {
 }
 async function modifyGroup(ctx) {
   const { id, name } = ctx.request.body
-  const operator =ctx.state.user.name
+  const operator = ctx.state.user.name
   await group.update(id, { name: name, operator: operator })
   ctx.body = {
     detail: '修改成功',
@@ -33,8 +34,10 @@ async function modifyGroup(ctx) {
   }
 }
 async function deleteGroup(ctx) {
-  const { id, projectId, operator } = ctx.request.body
-  let res = await group.destroy(id)
+  const { id, projectId } = ctx.request.body
+  let res = await group.findById(id)
+  await group.destroy(id)
+  const operator = ctx.username
   activity.insert({
     project_id: projectId,
     activity_type: 'delete',
@@ -68,7 +71,7 @@ module.exports = [
   },
   {
     handler: deleteGroup,
-    path: '/status/group',
-    method: 'delete'
+    path: '/status/deleteGroup',
+    method: 'post'
   }
 ]
