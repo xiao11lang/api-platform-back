@@ -1,4 +1,6 @@
 const instance = require('../model/api/apiInstance')
+const activity = require('../model/api/apiActivity')
+const project = require('../model/api/apiProject')
 async function addApiInstance(ctx) {
   const {
     meta,
@@ -43,24 +45,28 @@ async function getApiInfo(ctx) {
   }
 }
 async function deleteApi(ctx) {
-  const { id } = ctx.request.body
+  const { id, projectId, operator } = ctx.request.body
+  let res=await instance.findById(id)
   await instance.destroy(id)
+  activity.insert({
+    project_id: projectId,
+    activity_type: 'delete',
+    to_object: 'group',
+    operator: operator,
+    description: `${operator}删除了api(${res[0].dataValues.name})`
+  })
+  project.update(projectId, {
+    random: Math.random().toString()
+  })
   ctx.body = {
     detail: '删除成功',
     status: 1
   }
 }
 async function updateApi(ctx) {
-  const {id,data}=ctx.request.body
-  const {
-    meta,
-    description,
-    request,
-    response,
-    updator,
-    result
-  } = data
-  meta.group_id=meta.group
+  const { id, data } = ctx.request.body
+  const { meta, description, request, response, updator, result } = data
+  meta.group_id = meta.group
   await instance.update(id, {
     ...meta,
     description,

@@ -53,7 +53,7 @@ class ApiInstance extends BaseModel {
       activity.insert({
         project_id: project_id,
         activity_type: 'add',
-        to_object: 'group',
+        to_object: 'api',
         operator: updator,
         description: `${updator}新建了api（${name}）`
       })
@@ -66,22 +66,9 @@ class ApiInstance extends BaseModel {
       activity.insert({
         project_id: project_id,
         activity_type: 'modify',
-        to_object: 'group',
+        to_object: 'api',
         operator: updator,
         description: `${updator}修改了api(${name})`
-      })
-      project.update(project_id, {
-        random: Math.random().toString()
-      })
-    })
-    this.model.afterDestroy(group => {
-      const { project_id, updator, name } = group.dataValues
-      activity.insert({
-        project_id: project_id,
-        activity_type: 'modify',
-        to_object: 'group',
-        operator: updator,
-        description: `${updator}删除了api(${name})`
       })
       project.update(project_id, {
         random: Math.random().toString()

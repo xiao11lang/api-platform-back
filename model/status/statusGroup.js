@@ -1,10 +1,8 @@
 const { STRING, INTEGER } = require('sequelize')
 const BaseModel = require('../base')
-const activity = require('./apiActivity')
-const project = require('./apiProject')
-const user = require('../user')
-const instance = require('./apiInstance')
-const name = 'api_group'
+const activity = require('../api/apiActivity')
+const project = require('../api/apiProject')
+const name = 'status_group'
 const model = {
   project_id: {
     type: INTEGER
@@ -15,39 +13,37 @@ const model = {
   name: {
     type: STRING(20)
   },
-  operator_id: {
-    type: INTEGER
+  operator: {
+    type: STRING
   }
 }
-class APIGroup extends BaseModel {
+class StatusGroup extends BaseModel {
   constructor(name, model) {
     super(name, model)
     this.model.afterCreate(async group => {
-      const { project_id, name, operator_id } = group.dataValues
-      let from = await user.findById(operator_id)
+      const { project_id, name, operator } = group.dataValues
       activity.insert({
         project_id: project_id,
         activity_type: 'add',
-        to_object: 'group',
-        operator: from[0].dataValues.name,
-        description: `${from[0].dataValues.name}新建了分组（${name}）`
+        to_object: 'status',
+        operator: operator,
+        description: `${operator}新建了状态码分组（${name}）`
       })
       project.update(project_id, {
         random: Math.random().toString()
       })
     })
     this.model.afterUpdate(async group => {
-      const { project_id, name, operator_id } = group.dataValues
+      const { project_id, name, operator } = group.dataValues
       const oldName = group._previousDataValues.name
-      let from = await user.findById(operator_id)
       activity.insert({
         project_id: project_id,
         activity_type: 'modify',
-        to_object: 'group',
-        operator: from[0].dataValues.name,
+        to_object: 'status',
+        operator: operator,
         description: `${
-          from[0].dataValues.name
-        }修改了分组(${oldName})的名称,新分组名为(${name})`
+            operator
+        }修改了状态码分组(${oldName})的名称,新分组名为(${name})`
       })
       project.update(project_id, {
         random: Math.random().toString()
@@ -62,4 +58,4 @@ class APIGroup extends BaseModel {
     })
   }
 }
-module.exports = new APIGroup(name, model)
+module.exports = new StatusGroup(name, model)

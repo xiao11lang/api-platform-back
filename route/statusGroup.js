@@ -1,13 +1,12 @@
-const group = require('../model/api/apiGroup')
-const activity=require('../model/api/apiActivity')
-const project=require('../model/api/apiProject')
+const group = require('../model/status/statusGroup')
+const activity = require('../model/api/apiActivity')
+const project = require('../model/api/apiProject')
 async function addTopGroup(ctx) {
-  const { name, project_id } = ctx.request.body
-  const id = ctx.state.user.id
+  const { name, project_id, operator } = ctx.request.body
   const res = await group.insert({
     name,
     project_id,
-    operator_id: id
+    operator: operator
   })
   ctx.body = {
     detail: '新建分组成功',
@@ -25,22 +24,20 @@ async function getGroups(ctx) {
   }
 }
 async function modifyGroup(ctx) {
-  const { id, name } = ctx.request.body
-  const userId = ctx.state.user.id
-  await group.update(id, { name: name, operator_id: userId })
+  const { id, name, operator } = ctx.request.body
+  await group.update(id, { name: name, operator: operator })
   ctx.body = {
     detail: '修改成功',
     status: 1
   }
 }
 async function deleteGroup(ctx) {
-  const { id, operator,projectId } = ctx.request.body
-  let res = await group.findById(id)
-  await group.destroy(id)
+  const { id, projectId, operator } = ctx.request.body
+  let res = await group.destroy(id)
   activity.insert({
     project_id: projectId,
     activity_type: 'delete',
-    to_object: 'group',
+    to_object: 'status',
     operator: operator,
     description: `${operator}删除了分组(${res[0].dataValues.name})`
   })
@@ -55,22 +52,22 @@ async function deleteGroup(ctx) {
 module.exports = [
   {
     handler: addTopGroup,
-    path: '/addTopGroup',
+    path: '/status/group',
     method: 'post'
   },
   {
     handler: getGroups,
-    path: '/getGroups',
-    method: 'post'
+    path: '/status/groups',
+    method: 'get'
   },
   {
     handler: modifyGroup,
-    path: '/modifyGroup',
+    path: '/status/modifyGroup',
     method: 'post'
   },
   {
     handler: deleteGroup,
-    path: '/deleteGroup',
-    method: 'post'
+    path: '/status/group',
+    method: 'delete'
   }
 ]
