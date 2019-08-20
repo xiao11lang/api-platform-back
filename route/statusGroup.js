@@ -15,7 +15,7 @@ async function addTopGroup(ctx) {
   }
 }
 async function getGroups(ctx) {
-  const { id } = ctx.request.body
+  const { id } = ctx.query
   let res = await group.findByProjectId(id)
   ctx.body = {
     detail: '获取分组成功',
@@ -24,7 +24,8 @@ async function getGroups(ctx) {
   }
 }
 async function modifyGroup(ctx) {
-  const { id, name, operator } = ctx.request.body
+  const { id, name } = ctx.request.body
+  const operator =ctx.state.user.name
   await group.update(id, { name: name, operator: operator })
   ctx.body = {
     detail: '修改成功',
