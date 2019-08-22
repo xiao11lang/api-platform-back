@@ -13,7 +13,7 @@ app.use((ctx, next) => {
     return next()
   }
   if (path === 'login' || path === 'register' || (user && user.id)) {
-    ctx.username = ctx.state.user.name
+    if(user) ctx.username = ctx.state.user.name
     return next()
   } else {
     ctx.status = 401
