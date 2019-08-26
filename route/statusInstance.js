@@ -2,8 +2,8 @@ const instance = require('../model/status/statusInstance')
 const activity = require('../model/api/apiActivity')
 const project = require('../model/api/apiProject')
 async function addStatusInstance(ctx) {
-  const { name, projectId, groupId,code } = ctx.request.body
-  await instance.insert({
+  const { name, projectId, groupId, code } = ctx.request.body
+  const res = await instance.insert({
     name,
     project_id: projectId,
     group_id: groupId,
@@ -12,11 +12,12 @@ async function addStatusInstance(ctx) {
   })
   ctx.body = {
     detail: '新建成功',
-    status: 1
+    status: 1,
+    item: res
   }
 }
 async function getStatusInstances(ctx) {
-    const { id } = ctx.query
+  const { id } = ctx.query
   let res = await instance.findByProjectId(id)
   ctx.body = {
     detail: '获取api成功',
@@ -34,8 +35,9 @@ async function getStatusInfo(ctx) {
   }
 }
 async function deleteStatus(ctx) {
-  const { id, projectId, operator } = ctx.request.body
+  const { id, projectId } = ctx.request.body
   let res = await instance.findById(id)
+  const operator = ctx.username
   await instance.destroy(id)
   activity.insert({
     project_id: projectId,
@@ -53,20 +55,14 @@ async function deleteStatus(ctx) {
   }
 }
 async function updateStatus(ctx) {
-  const { id, data } = ctx.request.body
-  const { meta, description, request, response, updator, result } = data
-  meta.group_id = meta.group
+  const { id, groupId, name, code } = ctx.request.body
   await instance.update(id, {
-    ...meta,
-    description,
-    request,
-    response,
-    group_id: meta.group,
-    updator,
-    result
+    group_id: groupId,
+    name,
+    code
   })
   ctx.body = {
-    detail: '保存成功',
+    detail: '修改成功',
     status: 1
   }
 }
@@ -89,12 +85,12 @@ module.exports = [
   },
   {
     handler: deleteStatus,
-    path: '/deleteStatus',
+    path: '/status/delete',
     method: 'post'
   },
   {
     handler: updateStatus,
-    path: '/updateStatus',
+    path: '/status/update',
     method: 'post'
   }
 ]

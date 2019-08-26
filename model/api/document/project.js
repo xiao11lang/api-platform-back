@@ -1,27 +1,27 @@
 const { STRING, INTEGER } = require('sequelize')
-const BaseModel = require('../base')
-const activity = require('../api/apiActivity')
-const project = require('../api/apiProject')
-const name = 'status_instance'
+const BaseModel = require('../../base')
+const activity = require('../apiActivity')
+const project = require('../apiProject')
+const name = 'project_document'
 const model = {
   group_id: {
     type: INTEGER,
-    defaultValue:0
+    defaultValue: 0
   },
   project_id: {
-    type: INTEGER
-  },
-  code: {
     type: INTEGER
   },
   name: {
     type: STRING
   },
-  updator:{
-      type:STRING
+  updator: {
+    type: STRING
+  },
+  detail: {
+    type: STRING
   }
 }
-class StatusInstance extends BaseModel {
+class ProjectDocument extends BaseModel {
   constructor() {
     super(name, model)
     this.model.afterCreate(async group => {
@@ -29,9 +29,9 @@ class StatusInstance extends BaseModel {
       activity.insert({
         project_id: project_id,
         activity_type: 'add',
-        to_object: 'status_c',
+        to_object: 'project_c',
         operator: updator,
-        description: `${updator}新建了状态码（${name}）`
+        description: `${updator}新建了项目文档（${name}）`
       })
       project.update(project_id, {
         random: Math.random().toString()
@@ -42,9 +42,9 @@ class StatusInstance extends BaseModel {
       activity.insert({
         project_id: project_id,
         activity_type: 'modify',
-        to_object: 'status_c',
+        to_object: 'project_m',
         operator: updator,
-        description: `${updator}修改了状态码(${name})`
+        description: `${updator}修改了项目文档(${name})`
       })
       project.update(project_id, {
         random: Math.random().toString()
@@ -73,4 +73,4 @@ class StatusInstance extends BaseModel {
     })
   }
 }
-module.exports = new StatusInstance()
+module.exports = new ProjectDocument()
