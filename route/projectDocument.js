@@ -34,7 +34,7 @@ async function updateProjectDocument(ctx) {
   })
   ctx.body = {
     list: res,
-    detail: '获取文档成功',
+    detail: '修改文档成功',
     status: 1
   }
 }
