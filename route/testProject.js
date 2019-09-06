@@ -1,5 +1,5 @@
 const project = require('../model/test/testProject')
-const activity=require('../model/api/apiActivity')
+const activity = require('../model/api/apiActivity')
 async function addProject(ctx) {
   const { name, des, version, teamId } = ctx.request.body
   let res = await project.insert({
@@ -15,8 +15,8 @@ async function addProject(ctx) {
   }
 }
 async function getProjects(ctx) {
-  const { teamId } = ctx.request.body
-  let res = await project.findByTeamId(teamId)
+  const { id } = ctx.request.query
+  let res = await project.findByTeamId(id)
   ctx.body = {
     detail: '获取项目成功',
     status: 1,
@@ -27,12 +27,12 @@ async function getProjectById(ctx) {
   const { id } = ctx.request.body
   if (id) {
     let res = await project.findById(id)
-    let activities= await activity.findByProjectId(id)
+    let activities = await activity.findByProjectId(id)
     ctx.body = {
       detail: '获取项目成功',
       status: 1,
       list: res,
-      activities:activities
+      activities: activities
     }
   } else {
     ctx.status = 500
@@ -42,8 +42,8 @@ async function getProjectById(ctx) {
   }
 }
 async function deleteProject(ctx) {
-  const { projectId } = ctx.request.body
-  await project.destroy(projectId)
+  const { id } = ctx.request.query
+  await project.destroy(id)
   ctx.body = {
     detail: '删除成功',
     status: 1
@@ -58,14 +58,14 @@ async function modifyProject(ctx) {
   }
 }
 async function getActivities(ctx) {
-    const { projectId } = ctx.request.body
-    let res = await activity.findByProjectId(projectId)
-    ctx.body = {
-      detail: '获取项目成功',
-      status: 1,
-      list: res
-    }
+  const { projectId } = ctx.request.body
+  let res = await activity.findByProjectId(projectId)
+  ctx.body = {
+    detail: '获取项目成功',
+    status: 1,
+    list: res
   }
+}
 module.exports = [
   {
     path: '/test/project',
@@ -88,7 +88,7 @@ module.exports = [
     method: 'delete'
   },
   {
-    path: '/modifyProject',
+    path: '/test/project/update',
     handler: modifyProject,
     method: 'post'
   },
