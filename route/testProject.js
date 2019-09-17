@@ -26,6 +26,7 @@ async function getProjects(ctx) {
 async function getProject(ctx) {
   const { id } = ctx.request.query
   let res = await project.findById(id)
+  console.log(res);
   ctx.body = {
     detail: '获取项目成功',
     status: 1,
