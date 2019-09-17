@@ -23,6 +23,16 @@ async function getProjects(ctx) {
     list: res
   }
 }
+async function getProject(ctx) {
+  const { id } = ctx.request.query
+  let res = await project.findById(id)
+  ctx.body = {
+    detail: '获取项目成功',
+    status: 1,
+    list: res,
+    activities:[]
+  }
+}
 async function getProjectById(ctx) {
   const { id } = ctx.request.body
   if (id) {
@@ -73,8 +83,13 @@ module.exports = [
     method: 'post'
   },
   {
-    path: '/test/project',
+    path: '/test/projects',
     handler: getProjects,
+    method: 'get'
+  },
+  {
+    path: '/test/project',
+    handler: getProject,
     method: 'get'
   },
   {
